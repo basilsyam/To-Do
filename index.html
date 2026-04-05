@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مهامي | My Tasks</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="apple-touch-icon" href="icon-512.png">
+</head>
+<body>
+    <div class="container">
+        <!-- PWA Install Banner -->
+        <div id="pwa-install-banner" class="pwa-banner" style="display: none;">
+            <div class="pwa-info">
+                <i class="fas fa-sparkles"></i>
+                <span>ثبّت التطبيق لتجربة أسرع</span>
+            </div>
+            <button id="pwa-install-btn">تثبيت الآن</button>
+        </div>
+        <h1>قائمة المهام</h1>
+        
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-header">
+                <span>نسبة الإنجاز</span>
+                <span id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="header-actions">
+            <!-- Search -->
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="search-input" placeholder="بحث عن مهمة...">
+            </div>
+
+            <!-- Integrated Add/Edit Form -->
+            <div class="form-container">
+                <h2 id="sheet-title">إضافة مهمة جديدة</h2>
+                <form class="form">
+                    <div class="form-row">
+                        <input type="text" class="input" id="task-input" placeholder="ماذا تريد أن تفعل؟">
+                        <button type="submit" id="submit-btn" class="add-btn-final">حفظ</button>
+                    </div>
+                    <div class="form-row subtitle-row">
+                        <input type="text" id="subtitle-input" class="subtitle-input" placeholder="إضافة وصف أو ملاحظات (اختياري)...">
+                    </div>
+                    <div class="form-row secondary-actions">
+                        <div class="form-group">
+                            <label>الأولوية</label>
+                            <select id="priority-select" class="form-select">
+                                <option value="1">منخفضة 🔵</option>
+                                <option value="2" selected>متوسطة 🟡</option>
+                                <option value="3">قصوى 🔴</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>التاريخ</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-calendar-day"></i>
+                                <input type="date" id="due-date-input" class="form-date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row time-section">
+                        <div class="form-group">
+                            <label>من</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hourglass-start"></i>
+                                <input type="time" id="start-time-input" class="form-time">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>إلى</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-hourglass-end"></i>
+                                <input type="time" id="end-time-input" class="form-time">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success Sound -->
+        <audio id="success-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+        <!-- Filters -->
+        <div class="filters">
+            <div class="filter-btn active" data-filter="all">الكل</div>
+            <div class="filter-btn" data-filter="active">قيد التنفيذ</div>
+            <div class="filter-btn" data-filter="completed">المكتملة</div>
+        </div>
+
+        <!-- Tasks List -->
+        <div class="tasks" id="tasks-container">
+            <!-- Tasks will be injected here -->
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="footer-actions">
+            <span class="clear-all" id="clear-completed">مسح المهام المكتملة</span>
+        </div>
+    </div>
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
+
