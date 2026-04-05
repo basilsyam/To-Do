@@ -307,56 +307,49 @@ function toggleStatusTaskWith(taskId) {
 
 // --- PWA Installation & Offline Support ---
 let deferredPrompt;
-const installBanner = document.querySelector("#pwa-install-banner");
-const installBtn = document.querySelector("#pwa-install-btn");
+let installBanner, installBtn;
+
+window.addEventListener('DOMContentLoaded', () => {
+    installBanner = document.querySelector("#pwa-install-banner");
+    installBtn = document.querySelector("#pwa-install-btn");
+
+    // Debug tool for User
+    window.showInstallBanner = () => {
+        if (installBanner) installBanner.style.display = 'flex';
+        console.log('Install banner forced to show ✅');
+    };
+
+    // 3. Handle Install Button click
+    if (installBtn) {
+        installBtn.addEventListener('click', () => {
+            if (installBanner) installBanner.style.display = 'none';
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                });
+            }
+        });
+    }
+});
 
 // 1. Register Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker Registered!', reg))
-            .catch(err => console.log('Service Worker failed to register', err));
+            .catch(err => console.log('Service Worker failed', err));
     });
 }
 
 // 2. Listen for 'beforeinstallprompt'
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Check if app is NOT already in standalone mode
     if (window.matchMedia('(display-mode: standalone)').matches) return;
-
-    // Prevent default mini-infobar
     e.preventDefault();
-    // Stash the event
     deferredPrompt = e;
-    // Show the custom banner
     if (installBanner) installBanner.style.display = 'flex';
 });
 
-// 3. Handle Install Button click
-if (installBtn) {
-    installBtn.addEventListener('click', () => {
-        // Hide banner
-        if (installBanner) installBanner.style.display = 'none';
-        
-        if (deferredPrompt) {
-            // Show native prompt
-            deferredPrompt.prompt();
-            // Wait for user choice
-            deferredPrompt.userChoice.then((choiceResult) => {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User accepted the PWA install');
-                } else {
-                    console.log('User dismissed the PWA install');
-                }
-                deferredPrompt = null;
-            });
-        }
-    });
-}
-
-// 4. Hide banner if already installed
 window.addEventListener('appinstalled', () => {
-    console.log('PWA was installed!');
     if (installBanner) installBanner.style.display = 'none';
 });
 
