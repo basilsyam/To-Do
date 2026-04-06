@@ -15,6 +15,13 @@ let endTimeInput = document.querySelector("#end-time-input");
 let sheetTitle = document.querySelector("#sheet-title");
 let submitBtn = document.querySelector("#submit-btn");
 
+// Custom Dropdown Elements
+const dropdownWrapper = document.querySelector(".custom-select-wrapper");
+const dropdownTrigger = document.querySelector(".custom-select-trigger");
+const dropdownOptions = document.querySelectorAll(".custom-option");
+const selectedText = document.querySelector("#selected-priority-text");
+const hiddenPriorityInput = document.querySelector("#priority-select");
+
 let arrayOfTasks = [];
 let currentFilter = 'all';
 let searchQuery = '';
@@ -28,6 +35,7 @@ submit.onclick = function (e) {
     if (input.value.trim() !== "") {
         if (editingTaskId) {
             updateTask(editingTaskId);
+            showToast("تم تحديث المهمة بنجاح", "success");
         } else {
             addTaskToArray(
                 input.value.trim(), 
@@ -37,11 +45,30 @@ submit.onclick = function (e) {
                 startTimeInput.value,
                 endTimeInput.value
             );
+            showToast("تم إضافة المهمة بنجاح", "success");
         }
         
         resetForm();
     }
 };
+
+function showToast(message, icon) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+    Toast.fire({
+        icon: icon,
+        title: message
+    });
+}
 
 function resetForm() {
     input.value = ""; 
@@ -52,6 +79,15 @@ function resetForm() {
     editingTaskId = null;
     sheetTitle.textContent = "إضافة مهمة جديدة";
     submitBtn.textContent = "حفظ";
+    
+    // Reset Custom Dropdown
+    hiddenPriorityInput.value = "2";
+    selectedText.textContent = "متوسطة 🟡";
+    dropdownOptions.forEach(opt => {
+        opt.classList.remove("selected");
+        if (opt.getAttribute("data-value") == "2") opt.classList.add("selected");
+    });
+
     syncDisplays(); // Update visual displays
 }
 
@@ -76,6 +112,37 @@ function syncDisplays() {
     el.addEventListener('input', syncDisplays);
 });
 
+// Custom Dropdown Logic
+if (dropdownTrigger) {
+    dropdownTrigger.onclick = (e) => {
+        e.stopPropagation();
+        dropdownWrapper.classList.toggle("open");
+    };
+}
+
+dropdownOptions.forEach(option => {
+    option.onclick = () => {
+        const val = option.getAttribute("data-value");
+        const text = option.textContent;
+        
+        // Update selection
+        hiddenPriorityInput.value = val;
+        selectedText.textContent = text;
+        
+        // Update active class
+        dropdownOptions.forEach(opt => opt.classList.remove("selected"));
+        option.classList.add("selected");
+        
+        // Close
+        dropdownWrapper.classList.remove("open");
+    };
+});
+
+// Close on outside click
+document.addEventListener("click", () => {
+    if (dropdownWrapper) dropdownWrapper.classList.remove("open");
+});
+
 function openEditModal(taskId) {
     let task = arrayOfTasks.find(t => t.id == taskId);
     if (!task) return;
@@ -83,7 +150,16 @@ function openEditModal(taskId) {
     editingTaskId = taskId;
     input.value = task.title;
     subtitleInput.value = task.subtitle || "";
-    prioritySelect.value = task.priority;
+    
+    // Update Custom Dropdown for Edit
+    hiddenPriorityInput.value = task.priority;
+    const currentOption = Array.from(dropdownOptions).find(opt => opt.getAttribute("data-value") == task.priority);
+    if (currentOption) {
+        selectedText.textContent = currentOption.textContent;
+        dropdownOptions.forEach(opt => opt.classList.remove("selected"));
+        currentOption.classList.add("selected");
+    }
+
     dueDateInput.value = task.dueDate || "";
     startTimeInput.value = task.startTime || "";
     endTimeInput.value = task.endTime || "";
@@ -158,9 +234,29 @@ filterBtns.forEach(btn => {
 
 // Clear Completed
 clearCompletedBtn.onclick = () => {
-    arrayOfTasks = arrayOfTasks.filter(task => !task.completed);
-    addDataToLocalStorage(arrayOfTasks);
-    renderTasks();
+    if (arrayOfTasks.filter(task => task.completed).length === 0) {
+        showToast("لا توجد مهام مكتملة لمسحها", "info");
+        return;
+    }
+
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: "سيتم مسح جميع المهام المكتملة!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#6366f1',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'نعم، امسحها!',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            arrayOfTasks = arrayOfTasks.filter(task => !task.completed);
+            addDataToLocalStorage(arrayOfTasks);
+            renderTasks();
+            showToast("تم مسح المهام المكتملة", "success");
+        }
+    });
 };
 
 function addTaskToArray(taskText, priority, dueDate, subtitle, startTime, endTime) {
@@ -272,9 +368,24 @@ function getDataFromLocalStorage() {
 }
 
 function deleteTaskWith(taskId) {
-    arrayOfTasks = arrayOfTasks.filter((task) => task.id != taskId);
-    addDataToLocalStorage(arrayOfTasks);
-    renderTasks();
+    Swal.fire({
+        title: 'حذف المهمة؟',
+        text: "لن تتمكن من استرجاع هذه المهمة!",
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#94a3b8',
+        confirmButtonText: 'نعم، احذف',
+        cancelButtonText: 'إلغاء',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            arrayOfTasks = arrayOfTasks.filter((task) => task.id != taskId);
+            addDataToLocalStorage(arrayOfTasks);
+            renderTasks();
+            showToast("تم حذف المهمة", "success");
+        }
+    });
 }
 
 function toggleStatusTaskWith(taskId) {
