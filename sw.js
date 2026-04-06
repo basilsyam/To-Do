@@ -1,9 +1,9 @@
-const cacheName = 'todo-v3';
+const cacheName = 'todo-v5';
 const assets = [
   './',
   'index.html',
   'style.css',
-  'script.js',
+  'app-v3.js',
   './image/icon.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap'
@@ -11,6 +11,7 @@ const assets = [
 
 // Install event
 self.addEventListener('install', evt => {
+  self.skipWaiting();
   evt.waitUntil(
     caches.open(cacheName).then(cache => {
       console.log('caching shell assets');

@@ -35,7 +35,8 @@ body {
 }
 
 .container {
-  margin: 20px auto 100px;
+  max-width: 650px;
+  margin: 40px auto 100px;
   position: relative;
   background: var(--glass);
   backdrop-filter: blur(12px);
@@ -343,15 +344,50 @@ h1 {
   transition: all 0.3s;
 }
 
+.container {
+  max-width: 600px;
+  margin: 60px auto 100px;
+  position: relative;
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 32px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  padding: 32px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 1200px) {
+  .container {
+    margin-top: 100px;
+  }
+}
+
 .add-btn-final {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
   color: white;
   border: none;
-  padding: 0 24px;
-  border-radius: 14px;
+  padding: 0 32px;
+  border-radius: 16px;
   font-weight: 800;
+  font-size: 16px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.add-btn-final:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.4);
+}
+
+.add-btn-final:active {
+  transform: translateY(0);
 }
 
 .subtitle-input {
