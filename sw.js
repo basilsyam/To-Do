@@ -1,4 +1,4 @@
-const cacheName = 'todo-v5';
+const cacheName = 'todo-v10';
 const assets = [
   './',
   'index.html',

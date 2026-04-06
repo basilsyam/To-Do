@@ -407,29 +407,60 @@ h1 {
   outline: none;
   background: #f8fafc;
   width: 100%;
-  direction: ltr;
-  text-align: left;
+  direction: ltr; /* Fix scrambled text */
+  text-align: right;
+  cursor: pointer;
 }
 
 .input-with-icon {
   position: relative;
   display: flex;
   align-items: center;
+  cursor: pointer;
+}
+
+.display-val {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-main);
+  z-index: 2;
+  white-space: nowrap;
 }
 
 .input-with-icon i {
   position: absolute;
-  right: 12px;
+  left: 12px; 
   color: var(--primary);
-  font-size: 14px;
+  font-size: 16px;
   pointer-events: none;
+  z-index: 3;
 }
 
 .input-with-icon input {
-  padding-right: 40px !important;
-  direction: ltr;
-  text-align: left;
+  padding-right: 16px !important;
+  color: transparent !important; /* Hide native scrambled text */
+  background: white;
+  direction: ltr; /* Keeps native logic stable */
+  text-align: right;
+  height: 52px;
 }
+
+/* Chrome/Safari: Hide native picker arrows and digits */
+input[type="date"]::-webkit-datetime-edit,
+input[type="time"]::-webkit-datetime-edit {
+  display: none;
+}
+
+input::-webkit-calendar-picker-indicator {
+  display: none !important;
+}
+
+
 
 .edit {
   width: 36px;

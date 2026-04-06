@@ -52,7 +52,29 @@ function resetForm() {
     editingTaskId = null;
     sheetTitle.textContent = "إضافة مهمة جديدة";
     submitBtn.textContent = "حفظ";
+    syncDisplays(); // Update visual displays
 }
+
+function syncDisplays() {
+    const dView = document.querySelector("#due-date-display");
+    const sView = document.querySelector("#start-time-display");
+    const eView = document.querySelector("#end-time-display");
+
+    if (dueDateInput.value) {
+        const d = new Date(dueDateInput.value);
+        dView.textContent = d.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+    } else {
+        dView.textContent = "اختيار التاريخ...";
+    }
+
+    sView.textContent = startTimeInput.value || "--:--";
+    eView.textContent = endTimeInput.value || "--:--";
+}
+
+// Sync on input
+[dueDateInput, startTimeInput, endTimeInput].forEach(el => {
+    el.addEventListener('input', syncDisplays);
+});
 
 function openEditModal(taskId) {
     let task = arrayOfTasks.find(t => t.id == taskId);
@@ -69,10 +91,13 @@ function openEditModal(taskId) {
     sheetTitle.textContent = "تعديل المهمة";
     submitBtn.textContent = "تحديث";
     
+    syncDisplays(); // Sync visually
+    
     // Scroll to form
     document.querySelector(".form-container").scrollIntoView({ behavior: 'smooth' });
     input.focus();
 }
+
 
 function updateTask(taskId) {
     let index = arrayOfTasks.findIndex(t => t.id == taskId);
@@ -360,9 +385,27 @@ window.addEventListener('appinstalled', () => {
     if (installBanner) installBanner.style.display = 'none';
 });
 
+// --- Better Input Interaction ---
+window.addEventListener('DOMContentLoaded', () => {
+    const inputsToTrigger = document.querySelectorAll('.form-date, .form-time, .input-with-icon');
+    inputsToTrigger.forEach(container => {
+        container.addEventListener('click', (e) => {
+            const input = container.tagName === 'INPUT' ? container : container.querySelector('input');
+            if (input && typeof input.showPicker === 'function') {
+                try {
+                    input.showPicker();
+                } catch (err) {
+                    console.error("Picker error:", err);
+                }
+            }
+        });
+    });
+});
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
             .catch(err => console.log('Service Worker failed', err));
     });
 }
+
