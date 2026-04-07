@@ -629,11 +629,12 @@ input::-webkit-calendar-picker-indicator {
 }
 
 .clear-all {
-  font-size: 14px;
-  color: var(--danger);
-  font-weight: 700;
+  font-size: 25px;
+  color: red;
+  font-weight: 700;;
   cursor: pointer;
-  opacity: 0.8;
+  text-align: center;
+  opacity: 1;
 }
 
 .clear-all:hover { opacity: 1; text-decoration: underline; }
@@ -684,6 +685,12 @@ input::-webkit-calendar-picker-indicator {
   font-size: 18px;
 }
 
+.pwa-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 #pwa-install-btn {
   background: var(--primary);
   color: white;
@@ -694,6 +701,29 @@ input::-webkit-calendar-picker-indicator {
   font-weight: 800;
   cursor: pointer;
   transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.pwa-close {
+  font-size: 18px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  transition: all 0.2s;
+}
+
+.pwa-close:hover {
+  color: var(--danger);
+  transform: scale(1.1);
+}
+
+@media (max-width: 600px) {
+  .pwa-banner {
+    top: auto;
+    bottom: 20px;
+    width: calc(100% - 32px);
+    transform: translateX(-50%) translateY(20px);
+  }
 }
 
 #pwa-install-btn:hover {

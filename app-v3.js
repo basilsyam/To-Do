@@ -444,51 +444,65 @@ function toggleStatusTaskWith(taskId) {
 
 // --- PWA Installation & Offline Support ---
 let deferredPrompt;
-let installBanner = document.querySelector("#pwa-install-banner");
-let installBtn = document.querySelector("#pwa-install-btn");
+const installBanner = document.querySelector("#pwa-install-banner");
+const installBtn = document.querySelector("#pwa-install-btn");
+const closeBtn = document.querySelector("#pwa-close-btn");
+const pwaMessage = document.querySelector("#pwa-message");
 
-// Handle early event capture
+function isBannerDismissed() {
+    const dismissedTime = localStorage.getItem('pwa_banner_dismissed');
+    if (!dismissedTime) return false;
+    // Hide for 24 hours
+    return (Date.now() - parseInt(dismissedTime)) < (24 * 60 * 60 * 1000);
+}
+
+function showBanner() {
+    if (installBanner && !isBannerDismissed() && !window.matchMedia('(display-mode: standalone)').matches) {
+        installBanner.style.display = 'flex';
+    }
+}
+
+// Handle Android/Chrome Prompt
 window.addEventListener('beforeinstallprompt', (e) => {
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
     e.preventDefault();
     deferredPrompt = e;
-    if (installBanner) {
-        installBanner.style.display = 'flex';
-    } else {
-        window.addEventListener('DOMContentLoaded', () => {
-            installBanner = document.querySelector("#pwa-install-banner");
-            if (installBanner) installBanner.style.display = 'flex';
-        });
-    }
+    showBanner();
 });
 
+// Close button logic
+if (closeBtn) {
+    closeBtn.onclick = () => {
+        if (installBanner) installBanner.style.display = 'none';
+        localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+    };
+}
+
+// Install button logic
+if (installBtn) {
+    installBtn.onclick = () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(() => {
+                if (installBanner) installBanner.style.display = 'none';
+                deferredPrompt = null;
+            });
+        }
+    };
+}
+
+// iOS Detection & Handling
 window.addEventListener('DOMContentLoaded', () => {
-    installBanner = document.querySelector("#pwa-install-banner");
-    installBtn = document.querySelector("#pwa-install-btn");
-
-    if (installBtn) {
-        installBtn.addEventListener('click', () => {
-            if (installBanner) installBanner.style.display = 'none';
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    deferredPrompt = null;
-                });
-            }
-        });
-    }
-
-    // iOS Detection
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    // Enhanced iOS Detection (Includes iPadOS)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
     if (isIOS && !isStandalone) {
-        const info = document.querySelector(".pwa-info span");
-        if (info && installBanner) {
-            info.innerHTML = "ثبّت التطبيق: اضغط شارك <i class='fas fa-upload'></i> ثم 'إضافة للشاشة الرئيسية'";
-            if (installBtn) installBtn.style.display = "none";
-            installBanner.style.display = "flex";
+        if (pwaMessage) {
+            pwaMessage.innerHTML = "ثبّت التطبيق: اضغط <i class='fas fa-upload'></i> ثم 'إضافة للشاشة الرئيسية'";
         }
+        if (installBtn) installBtn.style.display = "none";
+        showBanner();
     }
 });
 
