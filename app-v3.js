@@ -452,12 +452,16 @@ const pwaMessage = document.querySelector("#pwa-message");
 function isBannerDismissed() {
     const dismissedTime = localStorage.getItem('pwa_banner_dismissed');
     if (!dismissedTime) return false;
-    // Hide for 24 hours
-    return (Date.now() - parseInt(dismissedTime)) < (24 * 60 * 60 * 1000);
+    // Hide for 12 hours instead of 24
+    return (Date.now() - parseInt(dismissedTime)) < (12 * 60 * 60 * 1000);
+}
+
+function checkStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 
 function showBanner() {
-    if (installBanner && !isBannerDismissed() && !window.matchMedia('(display-mode: standalone)').matches) {
+    if (installBanner && !isBannerDismissed() && !checkStandalone()) {
         installBanner.style.display = 'flex';
     }
 }
@@ -477,7 +481,10 @@ if (closeBtn) {
     };
 }
 
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// Detailed iOS Detection
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+              (navigator.userAgent.includes("Mac") && "ontouchend" in document) || 
+              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 // Install button logic
 if (installBtn) {
@@ -485,13 +492,12 @@ if (installBtn) {
         if (isIOS) {
             Swal.fire({
                 title: 'خطوات التثبيت للأيفون 📱',
-                html: '<div style="text-align: right; direction: rtl; font-size: 15px; line-height: 1.8;">نظام iOS يمنع التثبيت المباشر، يرجى اتباع التالي:<br><br>1️⃣ اضغط على أيقونة المشاركة <i class="fas fa-upload" style="color: #6366f1;"></i> أسفل شاشة سفاري.<br><br>2️⃣ اسحب القائمة للأعلى واختر <b>"إضافة للشاشة الرئيسية"</b> <i class="far fa-plus-square" style="color: #6366f1;"></i>.</div>',
+                html: '<div style="text-align: right; direction: rtl; font-size: 15px; line-height: 1.8;">نظام iOS يمنع التثبيت المباشر، يرجى اتباع التالي:<br><br>1️⃣ اضغط على أيقونة المشاركة <i class="fa-solid fa-arrow-up-from-bracket" style="color: #6366f1; margin: 0 5px;"></i> بمتصفح سفاري بالأسفل.<br><br>2️⃣ اسحب القائمة للأعلى واختر <b>"إضافة للشاشة الرئيسية"</b> <i class="far fa-plus-square" style="color: #6366f1; margin: 0 5px;"></i>.</div>',
                 icon: 'info',
-                confirmButtonText: 'حسناً، سأقوم بذلك',
+                confirmButtonText: 'حسناً، فهمت',
                 confirmButtonColor: '#6366f1'
             });
             if (installBanner) installBanner.style.display = 'none';
-            localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
         } else if (deferredPrompt) {
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then(() => {
@@ -504,13 +510,12 @@ if (installBtn) {
 
 // iOS Detection & Handling
 window.addEventListener('DOMContentLoaded', () => {
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-
-    if (isIOS && !isStandalone) {
+    if (isIOS && !checkStandalone()) {
         if (pwaMessage) {
-            pwaMessage.innerHTML = "تطبيق مهامي جاهز للتثبيت 🚀";
+            pwaMessage.innerHTML = "تثبيت التطبيق للأيفون 🚀";
         }
-        showBanner();
+        // Small delay to ensure styles and DOM readiness
+        setTimeout(showBanner, 500);
     }
 });
 
