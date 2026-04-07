@@ -477,10 +477,22 @@ if (closeBtn) {
     };
 }
 
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 // Install button logic
 if (installBtn) {
     installBtn.onclick = () => {
-        if (deferredPrompt) {
+        if (isIOS) {
+            Swal.fire({
+                title: 'خطوات التثبيت للأيفون 📱',
+                html: '<div style="text-align: right; direction: rtl; font-size: 15px; line-height: 1.8;">نظام iOS يمنع التثبيت المباشر، يرجى اتباع التالي:<br><br>1️⃣ اضغط على أيقونة المشاركة <i class="fas fa-upload" style="color: #6366f1;"></i> أسفل شاشة سفاري.<br><br>2️⃣ اسحب القائمة للأعلى واختر <b>"إضافة للشاشة الرئيسية"</b> <i class="far fa-plus-square" style="color: #6366f1;"></i>.</div>',
+                icon: 'info',
+                confirmButtonText: 'حسناً، سأقوم بذلك',
+                confirmButtonColor: '#6366f1'
+            });
+            if (installBanner) installBanner.style.display = 'none';
+            localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+        } else if (deferredPrompt) {
             deferredPrompt.prompt();
             deferredPrompt.userChoice.then(() => {
                 if (installBanner) installBanner.style.display = 'none';
@@ -492,16 +504,12 @@ if (installBtn) {
 
 // iOS Detection & Handling
 window.addEventListener('DOMContentLoaded', () => {
-    // Enhanced iOS Detection (Includes iPadOS)
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
     if (isIOS && !isStandalone) {
         if (pwaMessage) {
-            pwaMessage.innerHTML = "ثبّت التطبيق: اضغط <i class='fas fa-upload'></i> ثم 'إضافة للشاشة الرئيسية'";
+            pwaMessage.innerHTML = "تطبيق مهامي جاهز للتثبيت 🚀";
         }
-        if (installBtn) installBtn.style.display = "none";
         showBanner();
     }
 });
